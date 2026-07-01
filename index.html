@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050507" />
 <title>Mohamed Albaaja — Software Engineer</title>
 <meta name="description" content="Mohamed Albaaja — software engineer based in Libya, building practical solutions with code. Flutter, mobile & web projects on GitHub." />
 <meta property="og:title" content="Mohamed Albaaja — Software Engineer" />
@@ -12,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<noscript><style>.reveal, .hero-reveal{ opacity:1 !important; transform:none !important; } #preloader{ display:none !important; }</style></noscript>
 <style>
   :root{
     --bg:#050507;
@@ -19,6 +21,7 @@
     --fg:#f5f6f8;
     --muted:#93949c;
     --accent:#2997ff;
+    --accent2:#a855f7;
     --accent-soft: rgba(41,151,255,.15);
     --border: rgba(255,255,255,.09);
     --card: rgba(255,255,255,.035);
@@ -33,16 +36,33 @@
   }
   a{ color:inherit; text-decoration:none; }
   img{ max-width:100%; display:block; }
+  button{ font-family:inherit; cursor:pointer; }
 
   /* film-grain overlay for a premium, non-flat feel */
   body::after{
     content:"";
-    position:fixed; inset:0; pointer-events:none; z-index:40;
+    position:fixed; inset:0; pointer-events:none; z-index:45;
     opacity:.035; mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   ::selection{ background:var(--accent); color:#04101c; }
+
+  /* ---------- preloader ---------- */
+  #preloader{
+    position:fixed; inset:0; z-index:200; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #preloader.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .preloader-mark{ font-weight:800; font-size:1.4rem; letter-spacing:-.02em; }
+  .preloader-mark span{ color:var(--accent); }
+  .preloader-bar{ width:160px; height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .preloader-bar span{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .25s ease; }
+
+  /* ---------- scroll progress ---------- */
+  .scroll-progress{ position:fixed; top:0; left:0; right:0; height:3px; z-index:90; background:transparent; }
+  .scroll-progress span{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
 
   /* ---------- nav ---------- */
   nav{
@@ -55,18 +75,32 @@
   .logo{ font-weight:800; letter-spacing:-.02em; font-size:1.05rem; }
   .logo span{ color:var(--accent); }
   .nav-links{ display:flex; align-items:center; gap:clamp(16px,3vw,36px); font-size:.9rem; }
-  .nav-links a{ color:var(--muted); transition:color .25s ease; }
+  .nav-links a{ color:var(--muted); transition:color .25s ease; position:relative; padding-bottom:4px; }
+  .nav-links a::after{
+    content:""; position:absolute; left:0; bottom:0; height:1px; width:0%; background:var(--accent);
+    transition:width .3s ease;
+  }
   .nav-links a:hover{ color:var(--fg); }
+  .nav-links a.active{ color:var(--fg); }
+  .nav-links a.active::after{ width:100%; }
   .nav-gh{
     display:flex; align-items:center; gap:8px;
     border:1px solid var(--border); padding:8px 14px; border-radius:100px;
-    font-size:.85rem; transition:border-color .25s ease, transform .25s ease;
+    font-size:.85rem; transition:border-color .25s ease, transform .15s ease;
   }
-  .nav-gh:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .nav-gh:hover{ border-color:var(--accent); }
   .nav-gh svg{ width:16px; height:16px; }
 
   /* ---------- intro (hero + scrub) shares one fixed webgl canvas ---------- */
   #intro-wrapper{ position:relative; z-index:1; }
+  #heroGlow{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(480px circle at 50% 42%, var(--accent-soft), transparent 65%),
+      radial-gradient(320px circle at 80% 70%, rgba(168,85,247,.12), transparent 60%);
+    filter:blur(10px);
+    transition:opacity .6s ease;
+  }
   #webgl{
     position:fixed; inset:0; width:100vw; height:100vh; z-index:0;
     transition:opacity .6s ease;
@@ -77,28 +111,37 @@
     height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:0 20px;
   }
+  .hero-reveal{ opacity:0; transform:translateY(24px); }
+  body.ready .hero-reveal{ animation:heroIn .9s cubic-bezier(.16,.84,.44,1) forwards; }
+  @keyframes heroIn{ to{ opacity:1; transform:translateY(0); } }
+
   .eyebrow{
     font-size:.8rem; letter-spacing:.25em; color:var(--accent); font-weight:600; margin-bottom:18px;
+    animation-delay:.05s !important;
   }
+  .role-rotator{ display:inline-block; min-width:1px; transition:opacity .3s ease; }
   h1.name{
     font-size:clamp(2.6rem, 9vw, 6.4rem); font-weight:800; letter-spacing:-.03em; margin:0;
-    line-height:1.02;
+    line-height:1.02; animation-delay:.16s !important;
   }
   .lead{
     margin-top:20px; max-width:560px; color:var(--muted); font-size:clamp(1rem,2vw,1.2rem); line-height:1.6;
+    animation-delay:.3s !important;
   }
   .location-tag{
     margin-top:26px; display:inline-flex; align-items:center; gap:8px;
     border:1px solid var(--border); padding:7px 16px; border-radius:100px; font-size:.82rem; color:var(--muted);
+    animation-delay:.42s !important;
   }
   .scroll-cue{
-    position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:36px; left:0; right:0; margin-inline:auto; width:max-content;
     display:flex; flex-direction:column; align-items:center; gap:8px;
     font-size:.72rem; letter-spacing:.15em; color:var(--muted);
-    animation:bob 2.2s ease-in-out infinite;
+    animation-delay:.6s !important;
   }
+  body.ready .scroll-cue{ animation:heroIn .9s cubic-bezier(.16,.84,.44,1) forwards, bob 2.2s ease-in-out .9s infinite; }
   .scroll-cue svg{ width:14px; height:14px; }
-  @keyframes bob{ 0%,100%{ transform:translate(-50%,0);} 50%{ transform:translate(-50%,8px);} }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(8px);} }
 
   #scrub{ position:relative; z-index:1; height:100vh; }
   .scrub-inner{
@@ -127,25 +170,33 @@
   .stage-dots i.active{ background:var(--accent); transform:scale(1.6); }
 
   /* ---------- solid content sections ---------- */
-  .solid{ position:relative; z-index:2; background:var(--bg); }
+  .solid{
+    position:relative; z-index:2; background:var(--bg);
+    background-image:radial-gradient(1000px circle at 50% -10%, rgba(41,151,255,.06), transparent 60%);
+  }
   section.pad{ padding:min(14vw,140px) clamp(20px,6vw,80px); }
   .kicker{ color:var(--accent); font-weight:700; font-size:.8rem; letter-spacing:.2em; margin-bottom:14px; display:block; }
   h2.section-title{ font-size:clamp(1.8rem,4vw,2.8rem); font-weight:800; letter-spacing:-.02em; margin:0 0 20px; }
+
+  /* generic scroll-reveal */
+  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.16,.84,.44,1); }
+  .reveal.in{ opacity:1; transform:translateY(0); }
 
   #about .about-grid{
     display:grid; grid-template-columns:200px 1fr; gap:56px; align-items:start; max-width:980px; margin:0 auto;
   }
   .avatar-ring{
     width:180px; height:180px; border-radius:50%; padding:4px;
-    background:conic-gradient(from 0deg, var(--accent), transparent 60%, var(--accent));
+    background:conic-gradient(from 0deg, var(--accent), var(--accent2) 40%, transparent 60%, var(--accent));
   }
   .avatar-ring img{ width:100%; height:100%; border-radius:50%; object-fit:cover; border:4px solid var(--bg); }
   #about p.bio{ color:var(--muted); font-size:1.08rem; line-height:1.75; max-width:640px; }
   .skills{ display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
   .skill-chip{
     border:1px solid var(--border); padding:8px 16px; border-radius:100px; font-size:.85rem; color:var(--fg);
-    background:var(--card);
+    background:var(--card); transition:border-color .25s ease, transform .25s ease;
   }
+  .skill-chip:hover{ border-color:var(--accent); transform:translateY(-2px); }
   .stat-row{ display:flex; gap:36px; margin-top:34px; flex-wrap:wrap; }
   .stat b{ display:block; font-size:1.6rem; font-weight:800; }
   .stat span{ color:var(--muted); font-size:.82rem; }
@@ -157,20 +208,27 @@
     --mx:50%; --my:50%;
     position:relative; border:1px solid var(--border); border-radius:18px; padding:28px;
     background:var(--card); transition:border-color .3s ease, box-shadow .3s ease;
-    will-change:transform;
+    will-change:transform; overflow:hidden;
   }
   .card::before{
     content:""; position:absolute; inset:0; border-radius:18px; opacity:0; transition:opacity .3s ease;
     background:radial-gradient(320px circle at var(--mx) var(--my), var(--accent-soft), transparent 60%);
     pointer-events:none;
   }
+  .card::after{
+    content:""; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); transform:scaleX(0); transform-origin:left;
+    transition:transform .4s ease;
+  }
   .card:hover::before{ opacity:1; }
+  .card:hover::after{ transform:scaleX(1); }
   .card:hover{ border-color:rgba(255,255,255,.22); }
   .card h3{ font-size:1.15rem; margin:0 0 10px; letter-spacing:-.01em; }
   .card p{ color:var(--muted); font-size:.92rem; line-height:1.6; margin:0 0 18px; min-height:44px; }
   .card-meta{ display:flex; align-items:center; justify-content:space-between; font-size:.8rem; color:var(--muted); }
   .lang-dot{ width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block; margin-right:6px; }
-  .card-link{ font-size:.85rem; color:var(--accent); font-weight:600; display:inline-flex; align-items:center; gap:6px; margin-top:16px; }
+  .card-link{ font-size:.85rem; color:var(--accent); font-weight:600; display:inline-flex; align-items:center; gap:6px; margin-top:16px; transition:gap .25s ease; }
+  .card:hover .card-link{ gap:10px; }
   .more-link{ text-align:center; margin-top:44px; }
   .more-link a{ color:var(--accent); font-weight:600; border-bottom:1px solid var(--accent-soft); padding-bottom:3px; }
 
@@ -180,20 +238,29 @@
   .cta-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
   .btn{
     display:inline-flex; align-items:center; gap:10px; padding:14px 26px; border-radius:100px; font-weight:600; font-size:.95rem;
-    transition:transform .25s ease, background .25s ease;
+    transition:transform .15s ease, background .25s ease;
   }
   .btn-primary{ background:var(--accent); color:#04101c; }
-  .btn-primary:hover{ transform:translateY(-2px); }
   .btn-ghost{ border:1px solid var(--border); }
-  .btn-ghost:hover{ border-color:var(--accent); transform:translateY(-2px); }
+  .btn-ghost:hover{ border-color:var(--accent); }
 
-  footer{ text-align:center; padding:40px 20px 50px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--border); }
+  footer{ text-align:center; padding:40px 20px 50px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--border); position:relative; z-index:2; }
 
   .cursor-glow{
-    position:fixed; width:26px; height:26px; border-radius:50%; z-index:60; pointer-events:none;
+    position:fixed; width:26px; height:26px; border-radius:50%; z-index:80; pointer-events:none;
     background:radial-gradient(circle, var(--accent-soft), transparent 70%);
-    transform:translate(-50%,-50%); transition:opacity .3s ease; opacity:0;
+    transform:translate(-50%,-50%); transition:opacity .3s ease, width .25s ease, height .25s ease; opacity:0;
   }
+  .cursor-glow.grow{ width:56px; height:56px; }
+
+  #backToTop{
+    position:fixed; right:24px; bottom:24px; z-index:40;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--border); background:rgba(10,10,14,.7);
+    backdrop-filter:blur(8px); color:var(--fg); font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+    opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity .35s ease, transform .35s ease, border-color .25s ease;
+  }
+  #backToTop.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+  #backToTop:hover{ border-color:var(--accent); }
 
   @media (max-width:820px){
     #about .about-grid{ grid-template-columns:1fr; text-align:center; }
@@ -203,15 +270,22 @@
   }
   @media (prefers-reduced-motion: reduce){
     html{ scroll-behavior:auto; }
-    .scroll-cue{ animation:none; }
+    .hero-reveal, .scroll-cue, .reveal{ animation:none !important; transition:none !important; opacity:1 !important; transform:none !important; }
   }
 </style>
 </head>
 <body>
 
+<div id="preloader">
+  <div class="preloader-mark">MA<span>.</span></div>
+  <div class="preloader-bar"><span id="preloaderFill"></span></div>
+</div>
+
+<div class="scroll-progress"><span id="scrollProgressFill"></span></div>
+
 <nav>
   <a href="#hero" class="logo">MA<span>.</span></a>
-  <div class="nav-links">
+  <div class="nav-links" id="navLinks">
     <a href="#about">About</a>
     <a href="#projects">Work</a>
     <a href="#contact">Contact</a>
@@ -223,16 +297,18 @@
 </nav>
 
 <div class="cursor-glow" id="cursorGlow"></div>
+<button id="backToTop" aria-label="Back to top">↑</button>
 
 <div id="intro-wrapper">
+  <div id="heroGlow"></div>
   <canvas id="webgl"></canvas>
 
   <section id="hero">
-    <span class="eyebrow">SOFTWARE ENGINEER</span>
-    <h1 class="name">Mohamed Albaaja</h1>
-    <p class="lead">Building practical solutions with code — across mobile apps and the web.</p>
-    <span class="location-tag">📍 Libya</span>
-    <div class="scroll-cue">
+    <span class="eyebrow hero-reveal">SOFTWARE ENGINEER · <span class="role-rotator" id="roleText">Building for mobile &amp; web</span></span>
+    <h1 class="name hero-reveal">Mohamed Albaaja</h1>
+    <p class="lead hero-reveal">Building practical solutions with code — across mobile apps and the web.</p>
+    <span class="location-tag hero-reveal">📍 Libya</span>
+    <div class="scroll-cue hero-reveal">
       SCROLL
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
     </div>
@@ -264,24 +340,24 @@
 </div>
 
 <section id="about" class="solid pad">
-  <span class="kicker">ABOUT</span>
-  <h2 class="section-title">A little about me</h2>
+  <span class="kicker reveal">ABOUT</span>
+  <h2 class="section-title reveal">A little about me</h2>
   <div class="about-grid">
-    <div class="avatar-ring">
+    <div class="avatar-ring reveal">
       <img src="https://avatars.githubusercontent.com/u/192582181?v=4" alt="Mohamed Albaaja" loading="lazy" />
     </div>
     <div>
-      <p class="bio">I'm Mohamed, a software engineer based in Libya. I like building practical, working software — from Flutter apps to small web experiments like this page. Most of what I make lives on GitHub, out in the open for anyone to read, run, or fork.</p>
-      <div class="skills">
+      <p class="bio reveal">I'm Mohamed, a software engineer based in Libya. I like building practical, working software — from Flutter apps to small web experiments like this page. Most of what I make lives on GitHub, out in the open for anyone to read, run, or fork.</p>
+      <div class="skills reveal">
         <span class="skill-chip">Flutter &amp; Dart</span>
         <span class="skill-chip">C++</span>
         <span class="skill-chip">HTML / CSS / JS</span>
         <span class="skill-chip">Git &amp; GitHub</span>
         <span class="skill-chip">Mobile Development</span>
       </div>
-      <div class="stat-row">
-        <div class="stat"><b>4</b><span>Public repos</span></div>
-        <div class="stat"><b>7</b><span>Followers</span></div>
+      <div class="stat-row reveal" id="statRow">
+        <div class="stat"><b data-count="4">0</b><span>Public repos</span></div>
+        <div class="stat"><b data-count="7">0</b><span>Followers</span></div>
         <div class="stat"><b>🇱🇾</b><span>Libya</span></div>
       </div>
     </div>
@@ -289,17 +365,17 @@
 </section>
 
 <section id="projects" class="solid pad">
-  <span class="kicker">WORK</span>
-  <h2 class="section-title">Selected projects</h2>
+  <span class="kicker reveal">WORK</span>
+  <h2 class="section-title reveal">Selected projects</h2>
   <div class="grid" id="projectGrid"></div>
-  <div class="more-link"><a href="https://github.com/medobaja?tab=repositories" target="_blank" rel="noopener">View everything on GitHub →</a></div>
+  <div class="more-link reveal"><a href="https://github.com/medobaja?tab=repositories" target="_blank" rel="noopener">View everything on GitHub →</a></div>
 </section>
 
 <section id="contact" class="solid pad">
-  <span class="kicker">CONTACT</span>
-  <h2>Let's build something.</h2>
-  <p>Open to new projects, collaborations, or just talking shop about code.</p>
-  <div class="cta-row">
+  <span class="kicker reveal">CONTACT</span>
+  <h2 class="reveal">Let's build something.</h2>
+  <p class="reveal">Open to new projects, collaborations, or just talking shop about code.</p>
+  <div class="cta-row reveal">
     <a class="btn btn-primary" href="mailto:mohamedalbaja@gmail.com">Email me</a>
     <a class="btn btn-ghost" href="https://github.com/medobaja" target="_blank" rel="noopener">GitHub profile</a>
   </div>
@@ -312,6 +388,123 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- preloader ---------------- */
+(function preload(){
+  const el = document.getElementById('preloader');
+  const fill = document.getElementById('preloaderFill');
+  const start = performance.now();
+  let winLoaded = false;
+  window.addEventListener('load', () => { winLoaded = true; });
+
+  function finish(){
+    if (!el) return;
+    fill.style.width = '100%';
+    setTimeout(() => {
+      el.classList.add('hide');
+      document.body.classList.add('ready');
+      setTimeout(() => { el.remove(); }, 700);
+    }, 150);
+  }
+
+  if (reduceMotion){ finish(); return; }
+
+  function tick(){
+    const elapsed = performance.now() - start;
+    fill.style.width = Math.min(96, (elapsed/900)*100) + '%';
+    if ((winLoaded && elapsed > 450) || elapsed > 2500){ finish(); }
+    else { requestAnimationFrame(tick); }
+  }
+  requestAnimationFrame(tick);
+  setTimeout(finish, 3000); // hard safety net, never gets stuck
+})();
+
+/* ---------------- role text rotator ---------------- */
+(function rotateRole(){
+  const el = document.getElementById('roleText');
+  if (!el || reduceMotion) return;
+  const roles = ["Building for mobile & web", "Flutter & Dart developer", "Open-source, by default"];
+  let i = 0;
+  setInterval(() => {
+    i = (i+1) % roles.length;
+    el.style.opacity = 0;
+    setTimeout(() => { el.textContent = roles[i]; el.style.opacity = 1; }, 280);
+  }, 3200);
+})();
+
+/* ---------------- scroll progress + back-to-top + nav active state ---------------- */
+(function scrollUI(){
+  const fill = document.getElementById('scrollProgressFill');
+  const backBtn = document.getElementById('backToTop');
+  function onScroll(){
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    const pct = max > 0 ? (h.scrollTop/max)*100 : 0;
+    if (fill) fill.style.width = pct + '%';
+    if (backBtn) backBtn.classList.toggle('show', h.scrollTop > window.innerHeight);
+  }
+  window.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+  if (backBtn){
+    backBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+  }
+
+  const navMap = {};
+  document.querySelectorAll('#navLinks a[href^="#"]').forEach(a => { navMap[a.getAttribute('href').slice(1)] = a; });
+  const sections = Object.keys(navMap).map(id => document.getElementById(id)).filter(Boolean);
+  if ('IntersectionObserver' in window && sections.length){
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          Object.values(navMap).forEach(a => a.classList.remove('active'));
+          const link = navMap[entry.target.id];
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { rootMargin:'-45% 0px -45% 0px', threshold:0 });
+    sections.forEach(s => obs.observe(s));
+  }
+})();
+
+/* ---------------- generic scroll-reveal ---------------- */
+(function reveal(){
+  const els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  if (!('IntersectionObserver' in window)){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, { threshold:0.15 });
+  els.forEach((el, i) => { el.style.transitionDelay = Math.min(i%6, 5)*0.06 + 's'; obs.observe(el); });
+})();
+
+/* ---------------- count-up stats ---------------- */
+(function countUp(){
+  const row = document.getElementById('statRow');
+  if (!row) return;
+  const targets = row.querySelectorAll('b[data-count]');
+  function run(){
+    targets.forEach(el => {
+      const target = parseInt(el.getAttribute('data-count'), 10) || 0;
+      if (reduceMotion){ el.textContent = target; return; }
+      const dur = 1100, start = performance.now();
+      function step(t){
+        const p = Math.min((t-start)/dur, 1);
+        el.textContent = Math.floor(p*target);
+        if (p < 1) requestAnimationFrame(step); else el.textContent = target;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  if ('IntersectionObserver' in window){
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting){ run(); obs.disconnect(); } });
+    }, { threshold:0.4 });
+    obs.observe(row);
+  } else { run(); }
+})();
 
 /* ---------------- project data (from github.com/medobaja) ---------------- */
 const projects = [
@@ -339,7 +532,7 @@ const grid = document.getElementById('projectGrid');
 projects.forEach(p => {
   const card = document.createElement('a');
   card.href = p.url; card.target = "_blank"; card.rel = "noopener";
-  card.className = "card";
+  card.className = "card reveal";
   card.innerHTML = `
     <h3>${p.name}</h3>
     <p>${p.desc}</p>
@@ -351,6 +544,15 @@ projects.forEach(p => {
   `;
   grid.appendChild(card);
 });
+// re-run reveal wiring for the cards we just added
+(function revealCards(){
+  const cards = grid.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)){ cards.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); } });
+  }, { threshold:0.15 });
+  cards.forEach((el,i) => { el.style.transitionDelay = (i*0.08) + 's'; obs.observe(el); });
+})();
 
 /* ---------------- 3D tilt on project cards ---------------- */
 function addTilt(el){
@@ -367,25 +569,43 @@ function addTilt(el){
 }
 document.querySelectorAll('.card').forEach(addTilt);
 
+/* ---------------- magnetic buttons ---------------- */
+function magnetize(el, strength){
+  el.addEventListener('pointermove', (e) => {
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - (r.left + r.width/2);
+    const y = e.clientY - (r.top + r.height/2);
+    el.style.transform = `translate(${(x/r.width)*strength}px, ${(y/r.height)*strength}px)`;
+  });
+  el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+}
+if (window.matchMedia('(pointer:fine)').matches){
+  document.querySelectorAll('.btn, .nav-gh, #backToTop').forEach(el => magnetize(el, 10));
+}
+
 /* ---------------- soft cursor glow (desktop only) ---------------- */
 const fine = window.matchMedia('(pointer:fine)').matches;
 const glow = document.getElementById('cursorGlow');
 if (fine){
   let gx=0, gy=0, cx=0, cy=0;
   window.addEventListener('pointermove', e => { gx=e.clientX; gy=e.clientY; glow.style.opacity=1; });
+  document.querySelectorAll('a, button, .card').forEach(el => {
+    el.addEventListener('pointerenter', () => glow.classList.add('grow'));
+    el.addEventListener('pointerleave', () => glow.classList.remove('grow'));
+  });
   (function loopGlow(){
     cx += (gx-cx)*0.18; cy += (gy-cy)*0.18;
     glow.style.left = cx+'px'; glow.style.top = cy+'px';
     requestAnimationFrame(loopGlow);
   })();
-} else { glow.style.display = 'none'; }
+} else if (glow) { glow.style.display = 'none'; }
 
 /* ---------------- 3D hero / scrub scene ---------------- */
 (function initScene(){
   if (typeof THREE === 'undefined') return; // graceful no-js-lib fallback
 
   const canvas = document.getElementById('webgl');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const heroGlow = document.getElementById('heroGlow');
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
@@ -421,15 +641,43 @@ if (fine){
   const wireMesh = new THREE.LineSegments(edgesGeo, wireMaterial);
   wireMesh.scale.setScalar(1.002);
 
+  // extra glow rim: slightly larger, additive-blended wireframe halo
+  const glowMaterial = new THREE.LineBasicMaterial({ color:0x2997ff, transparent:true, opacity:0, blending:THREE.AdditiveBlending });
+  const glowMesh = new THREE.LineSegments(edgesGeo, glowMaterial);
+  glowMesh.scale.setScalar(1.06);
+
   const pointsMaterial = new THREE.PointsMaterial({ color:0xffffff, size:0.045, transparent:true, opacity:0 });
   const pointsMesh = new THREE.Points(geometry, pointsMaterial);
 
   const group = new THREE.Group();
-  group.add(solidMesh, wireMesh, pointsMesh);
+  group.add(solidMesh, wireMesh, glowMesh, pointsMesh);
   scene.add(group);
 
+  // sparse starfield for depth
+  const starCount = 260;
+  const starPositions = new Float32Array(starCount*3);
+  for (let i=0; i<starCount; i++){
+    const r = 14 + Math.random()*18;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos((Math.random()*2)-1);
+    starPositions[i*3] = r*Math.sin(phi)*Math.cos(theta);
+    starPositions[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+    starPositions[i*3+2] = r*Math.cos(phi) - 6;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+  const starMaterial = new THREE.PointsMaterial({ color:0xffffff, size:0.03, transparent:true, opacity:0.5 });
+  const stars = new THREE.Points(starGeo, starMaterial);
+  scene.add(stars);
+
   /* click = color cycle + spin flourish */
-  const palette = [0x2997ff, 0xa855f7, 0x22d3ee, 0xf97316, 0x34d399];
+  const palette = [
+    { main:0x2997ff, css:'#2997ff' },
+    { main:0xa855f7, css:'#a855f7' },
+    { main:0x22d3ee, css:'#22d3ee' },
+    { main:0xf97316, css:'#f97316' },
+    { main:0x34d399, css:'#34d399' }
+  ];
   let paletteIdx = 0;
   const raycaster = new THREE.Raycaster();
   const mouseVec = new THREE.Vector2();
@@ -441,15 +689,18 @@ if (fine){
     if (raycaster.intersectObject(solidMesh).length){
       paletteIdx = (paletteIdx+1) % palette.length;
       const c = palette[paletteIdx];
-      solidMaterial.color.setHex(c);
-      wireMaterial.color.setHex(c);
-      pointsMaterial.color.setHex(c);
-      document.documentElement.style.setProperty('--accent', '#'+c.toString(16).padStart(6,'0'));
+      solidMaterial.color.setHex(c.main);
+      wireMaterial.color.setHex(c.main);
+      glowMaterial.color.setHex(c.main);
+      pointsMaterial.color.setHex(c.main);
+      document.documentElement.style.setProperty('--accent', c.css);
       if (window.gsap){
         gsap.to({v:clickImpulse}, {
           v: clickImpulse + Math.PI*2, duration:1.3, ease:'power3.out',
           onUpdate(){ clickImpulse = this.targets()[0].v; }
         });
+      } else {
+        clickImpulse += Math.PI*2;
       }
     }
   });
@@ -462,7 +713,7 @@ if (fine){
   });
 
   /* scroll-scrub state, driven by ScrollTrigger onUpdate below */
-  let scrollRotY = 0, scrollRotX = 0;
+  let scrollRotY = 0, scrollRotX = 0, scrollProgress = 0;
   const stageDotsEl = document.getElementById('stageDots');
   const captionEls = document.querySelectorAll('.scrub-caption');
 
@@ -470,17 +721,22 @@ if (fine){
   function mapRange(v, a, b, c, d){ return c + (clamp(v,a,b)-a) * (d-c) / (b-a); }
 
   function updateScene(p){
+    scrollProgress = p;
     scrollRotY = p * Math.PI * 3;
     scrollRotX = p * Math.PI * 1.1;
 
     const solidToWire = clamp(mapRange(p, 0.05, 0.45, 0, 1), 0, 1);
     solidMaterial.opacity = 1 - solidToWire*0.85;
     wireMaterial.opacity = solidToWire;
+    glowMaterial.opacity = solidToWire * 0.35;
 
     const wireToParticles = clamp(mapRange(p, 0.55, 0.95, 0, 1), 0, 1);
     pointsMaterial.opacity = wireToParticles;
     pointsMesh.scale.setScalar(1 + wireToParticles*0.6);
     wireMaterial.opacity *= (1 - wireToParticles*0.5);
+    glowMaterial.opacity *= (1 - wireToParticles*0.4);
+
+    if (heroGlow) heroGlow.style.opacity = 1 - wireToParticles*0.6;
   }
 
   function updateCaptions(p){
@@ -523,17 +779,21 @@ if (fine){
   /* pause rendering once the intro is scrolled out of view */
   let running = true;
   const introEl = document.getElementById('intro-wrapper');
-  new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting){
-        canvas.style.opacity = 1;
-        if (!running){ running = true; requestAnimationFrame(animate); }
-      } else {
-        canvas.style.opacity = 0;
-        running = false;
-      }
-    });
-  }, { threshold:0 }).observe(introEl);
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          canvas.style.opacity = 1;
+          if (heroGlow) heroGlow.style.opacity = 1;
+          if (!running){ running = true; requestAnimationFrame(animate); }
+        } else {
+          canvas.style.opacity = 0;
+          if (heroGlow) heroGlow.style.opacity = 0;
+          running = false;
+        }
+      });
+    }, { threshold:0 }).observe(introEl);
+  }
 
   let autoSpin = 0;
   function animate(){
@@ -542,8 +802,11 @@ if (fine){
     curMouseX += (mouseX-curMouseX)*0.05;
     curMouseY += (mouseY-curMouseY)*0.05;
     if (!reduceMotion) autoSpin += 0.0015;
+    const breathe = reduceMotion ? 1 : 1 + Math.sin(performance.now()*0.0009)*0.025;
     group.rotation.y = scrollRotY + curMouseX*0.3 + autoSpin + clickImpulse;
     group.rotation.x = scrollRotX + curMouseY*0.2;
+    group.scale.setScalar(breathe);
+    stars.rotation.y += 0.00025;
     renderer.render(scene, camera);
   }
   animate();
